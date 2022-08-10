@@ -1,2 +1,3 @@
-# hypex-smartcontract
+# hypex-utility
+
 Smart contract repo
