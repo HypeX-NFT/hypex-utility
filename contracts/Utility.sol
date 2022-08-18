@@ -2,18 +2,33 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-contract Utility {
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "./interfaces/IUtilityHelper.sol";
+import "./interfaces/IUtilityMeter.sol";
+import "./interfaces/IUtilityMembership.sol";
+
+contract Utility is IUtilityMeter, IUtilityMembership {
     address public owner;
     address public nft;
     bool public is721;
+    IUtilityHelper.MembershipType mType;
 
-    bool public status;
-    uint256 public balance;
-    uint256 public price;
-    uint256 public expireDate;
-    address public wallet;
+    struct Meter {
+        address account;
+        uint256 balance;
+        uint256 startAt;
+        bool status;
+    }
 
-    mapping(uint256 => address) public meterWallets;
+    uint256 public memberPrice;
+    uint256 public rightPrice;
+    mapping(uint256 => Meter) public meters;
+
+    event MembershipRequested(uint256 id, address account);
+    event MembershipApproved(uint256 id, address account);
+    event UseRightRequested(uint256 id, address account);
+    event UseRightApproved(uint256 id, address account);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Utility: the caller is not the owner");
@@ -23,52 +38,89 @@ contract Utility {
     constructor(
         address owner_,
         address nft_,
-        bool is721_
+        bool is721_,
+        IUtilityHelper.MembershipType mType_
     ) {
         owner = owner_;
         nft = nft_;
         is721 = is721_;
+        mType = mType_;
     }
 
-    function isValid(uint256 tokenId_) public view returns (bool) {
-        return meterWallets[tokenId_] == address(0);
+    function withdraw() external onlyOwner {
+        payable(owner).transfer(address(this).balance);
     }
 
-    function setStatus(bool status_) external onlyOwner {
-        status = status_;
+    function setMembershipPrice(uint256 price) external onlyOwner {
+        memberPrice = price;
     }
 
-    function setBalance(uint256 balance_) external onlyOwner {
-        balance = balance_;
+    function setRightPrice(uint256 price) external onlyOwner {
+        rightPrice = price;
     }
 
-    function setPrice(uint256 price_) external onlyOwner {
-        price = price_;
+    function isValidMember(uint256 tokenId) public view returns (bool) {
+        return meters[tokenId].status;
     }
 
-    function setExpireDate(uint256 expireDate_) external onlyOwner {
-        require(expireDate_ > block.timestamp, "Utility: expire date should be later than now");
-        expireDate = expireDate_;
+    function requestMembership(uint256 tokenId) external payable {
+        require(
+            is721
+                ? (IERC721(nft).ownerOf(tokenId) == msg.sender)
+                : (IERC1155(nft).balanceOf(msg.sender, tokenId) > 0),
+            "Utility: caller is not the owner of this nft"
+        );
+        require(!meters[tokenId].status, "Utility: membership already approved");
+        require(meters[tokenId].account == address(0), "Utility: pending request already exists");
+        require(msg.value >= memberPrice, "Utility: insufficient to request membership");
+        meters[tokenId] = Meter(msg.sender, 0, block.timestamp, true);
+        if (msg.value > memberPrice) payable(msg.sender).transfer(msg.value - memberPrice);
+        emit MembershipRequested(tokenId, msg.sender);
     }
 
-    function setWallet(address wallet_) external onlyOwner {
-        require(wallet_ != address(0), "Utility: zero wallet address");
-        wallet = wallet_;
+    function approveRequest(uint256 tokenId) external onlyOwner {
+        require(
+            meters[tokenId].account != address(0) && !meters[tokenId].status,
+            "Utility: no pending request for token id"
+        );
+        meters[tokenId].status = true;
+        emit MembershipApproved(tokenId, meters[tokenId].account);
     }
 
-    function begin(uint256 tokenId_, address wallet_) external onlyOwner {
-        require(isValid(tokenId_), "Utility: already began");
-        meterWallets[tokenId_] = wallet_;
+    function increaseBalance(uint256 tokenId) external payable {
+        require(meters[tokenId].status, "Utility: not approved for token id");
+        require(
+            meters[tokenId].account == msg.sender,
+            "Utility: caller is not the owner of this nft"
+        );
+        meters[tokenId].balance += msg.value;
     }
 
-    function end(uint256 tokenId_) external onlyOwner {
-        delete meterWallets[tokenId_];
+    function requestUseRight(uint256 tokenId) external onlyOwner {
+        require(meters[tokenId].status, "Utility: not approved for token id");
+        emit UseRightRequested(tokenId, msg.sender);
     }
 
-    function makePayment() external {}
+    function approveUseRights(uint256 tokenId) external {
+        require(meters[tokenId].status, "Utility: not approved for token id");
+        require(
+            meters[tokenId].account == msg.sender,
+            "Utility: caller is not the owner of this nft"
+        );
+        emit UseRightApproved(tokenId, meters[tokenId].account);
+    }
 
-    function use() external payable {
-        require(msg.value >= price, "Utility: insufficient to use");
-        if (msg.value > price) payable(msg.sender).transfer(msg.value - price);
+    function useRight(uint256 tokenId) external onlyOwner {
+        require(meters[tokenId].status, "Utility: not approved for token id");
+        meters[tokenId].balance -= rightPrice;
+    }
+
+    function assignTo(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "Utility: new owner address is 0x0");
+        owner = newOwner;
+    }
+
+    function renounceOwnership() external onlyOwner {
+        owner = address(0);
     }
 }
