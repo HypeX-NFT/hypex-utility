@@ -35,7 +35,7 @@ export default {
     apiKey: process.env.API_KEY,
   },
   solidity: {
-    version: '0.8.15',
+    version: '0.8.16',
     settings: {
       optimizer: {
         enabled: true,

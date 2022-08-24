@@ -1,11 +1,12 @@
 // solhint-disable
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IUtilityHelper.sol";
-import "./Utility.sol";
+import "./Utility721.sol";
+import "./Utility1155.sol";
 
 contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
     address public helper;
@@ -14,7 +15,8 @@ contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
     event UtilityCreated(
         address indexed nft,
         address indexed utility,
-        IUtilityHelper.MembershipType indexed mType
+        IUtilityHelper.MembershipType indexed mType,
+        bool is721
     );
 
     modifier onlyNFTIssuer(address nft) {
@@ -44,10 +46,12 @@ contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
         require(utilities[nft] == address(0), "Factory: utilitiy already exists");
         uint8 nType = IUtilityHelper(helper).getType(nft);
         require(nType > 0, "Factory: given address is not erc721 or erc1155 standard");
-        Utility utility = new Utility(msg.sender, nft, nType == 1, mType);
-        utilities[nft] = address(utility);
-        emit UtilityCreated(nft, address(utility), mType);
-        return address(utility);
+        address utility;
+        if (nType == 1) utility = address(new Utility721(msg.sender, nft, mType));
+        else utility = address(new Utility1155(msg.sender, nft, mType));
+        utilities[nft] = utility;
+        emit UtilityCreated(nft, utility, mType, nType == 1);
+        return utility;
     }
 
     function getUtility(address nft) external view returns (address) {
