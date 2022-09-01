@@ -5,8 +5,8 @@ pragma solidity 0.8.16;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IUtilityHelper.sol";
-import "./Utility721.sol";
-import "./Utility1155.sol";
+import "./MemberUtility721.sol";
+import "./MemberUtility1155.sol";
 
 contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
     address public helper;
@@ -38,7 +38,7 @@ contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function bind(address nft, IUtilityHelper.MembershipType mType)
+    function bindMember(address nft, IUtilityHelper.MembershipType mType)
         external
         onlyNFTIssuer(nft)
         returns (address)
@@ -47,8 +47,8 @@ contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
         uint8 nType = IUtilityHelper(helper).getType(nft);
         require(nType > 0, "Factory: given address is not erc721 or erc1155 standard");
         address utility;
-        if (nType == 1) utility = address(new Utility721(msg.sender, nft, mType));
-        else utility = address(new Utility1155(msg.sender, nft, mType));
+        if (nType == 1) utility = address(new MemberUtility721(msg.sender, nft, mType));
+        else utility = address(new MemberUtility1155(msg.sender, nft, mType));
         utilities[nft] = utility;
         emit UtilityCreated(nft, utility, mType, nType == 1);
         return utility;

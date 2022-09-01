@@ -38,9 +38,9 @@
     }
   ],
   "impls": {
-    "f4db45211fd0434acbd7e4d3122fdabaa0a3dad0a4dc9d108a4ca2f95e92704d": {
+    "3be8f466446ce3e960438a55ee1165b406e3e3efd8429a81b0a74b264ced39f3": {
       "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-      "txHash": "0x78ec93b9a5dab930b8f4712501c8fcd36987a96f638795025041d09cdfd13809",
+      "txHash": "0x69ae9f44e3aa4afd647265a3661e3ef377047959431af173a2c727085a9ab296",
       "layout": {
         "storage": [
           {
@@ -106,7 +106,7 @@
             "slot": "201",
             "type": "t_address",
             "contract": "UtilityFactory",
-            "src": "contracts/UtilityFactory.sol:11"
+            "src": "contracts/UtilityFactory.sol:12"
           },
           {
             "label": "utilities",
@@ -114,7 +114,7 @@
             "slot": "202",
             "type": "t_mapping(t_address,t_address)",
             "contract": "UtilityFactory",
-            "src": "contracts/UtilityFactory.sol:12"
+            "src": "contracts/UtilityFactory.sol:13"
           }
         ],
         "types": {

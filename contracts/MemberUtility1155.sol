@@ -3,12 +3,12 @@
 pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "./BaseUtility.sol";
+import "./BaseMemberUtility.sol";
 import "./interfaces/IUtilityHelper.sol";
 import "./interfaces/IUtilityMeter1155.sol";
 import "./interfaces/IUtilityMembership1155.sol";
 
-contract Utility1155 is BaseUtility, IUtilityMeter1155, IUtilityMembership1155 {
+contract MemberUtility1155 is BaseMemberUtility, IUtilityMeter1155, IUtilityMembership1155 {
     mapping(address => mapping(uint256 => Meter)) public meters;
 
     constructor(

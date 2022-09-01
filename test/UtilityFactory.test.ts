@@ -43,9 +43,9 @@ describe('UtilityFactory', function () {
     });
   });
 
-  describe('#bind', () => {
+  describe('#bindMember', () => {
     it('should bind owned nft properly', async () => {
-      const tx = await factory.bind(ownedNFT.address, 0);
+      const tx = await factory.bindMember(ownedNFT.address, 0);
       const receipt = await tx.wait();
       const utility = receipt.events[0].args.utility;
       expect(tx).emit(factory, 'UtilityCreated').withArgs(ownedNFT.address, utility, 0);
@@ -53,13 +53,13 @@ describe('UtilityFactory', function () {
     });
 
     it('should revert if bind called by not owner', async () => {
-      await expect(factory.connect(alice).bind(ownedNFT.address, 0)).to.revertedWith(
+      await expect(factory.connect(alice).bindMember(ownedNFT.address, 0)).to.revertedWith(
         'Factory: not nft issuer',
       );
     });
 
     it('should bind nft properly', async () => {
-      const tx = await factory.bind(nft.address, 0);
+      const tx = await factory.bindMember(nft.address, 0);
       const receipt = await tx.wait();
       const utility = receipt.events[0].args.utility;
       expect(tx).emit(factory, 'UtilityCreated').withArgs(nft.address, utility, 0);

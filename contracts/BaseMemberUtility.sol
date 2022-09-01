@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./interfaces/IUtilityHelper.sol";
 
-abstract contract BaseUtility {
+abstract contract BaseMemberUtility {
     address public owner;
     address public nft;
     IUtilityHelper.MembershipType mType;
