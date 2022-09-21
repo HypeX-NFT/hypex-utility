@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
+pragma solidity 0.8.17;
 
 interface IUtilityMembership721 {
     function isValidMember(uint256 tokenId) external view returns (bool);

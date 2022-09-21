@@ -52,7 +52,7 @@ describe('UtilityFactory', function () {
       expect(await factory.utilities(ownedNFT.address)).to.eq(utility);
     });
 
-    it('should revert if bind called by not owner', async () => {
+    it('should revert if bind called by not account', async () => {
       await expect(factory.connect(alice).bindMember(ownedNFT.address, 0)).to.revertedWith(
         'Factory: not nft issuer',
       );

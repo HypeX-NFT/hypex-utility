@@ -1,22 +1,18 @@
 // solhint-disable
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
-
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "./interfaces/IUtilityHelper.sol";
+pragma solidity 0.8.17;
 
 abstract contract BaseMemberUtility {
     address public owner;
     address public nft;
-    IUtilityHelper.MembershipType mType;
     uint256 public expiration;
 
     struct Meter {
         address account;
-        uint256 balance;
-        uint256 lastChecked;
-        bool status;
+        uint256 right;
+        uint256 lastUpdated;
+        bool isValid;
+        uint8 useStatus;
     }
 
     uint256 public memberPrice;
@@ -24,6 +20,9 @@ abstract contract BaseMemberUtility {
 
     event MembershipRequested(uint256 id, address account);
     event MembershipApproved(uint256 id, address account);
+    event MembershipForfeitted(uint256 id, address account);
+    event MembershipRequestDiscarded(uint256 id, address account);
+    event MembershipAssignedTo(uint256 id, address to);
     event UseRightRequested(uint256 id, address account);
     event UseRightApproved(uint256 id, address account);
 
@@ -46,14 +45,5 @@ abstract contract BaseMemberUtility {
 
     function setExpiration(uint256 duartion) external onlyOwner {
         expiration = duartion;
-    }
-
-    function assignTo(address newOwner) external onlyOwner {
-        require(newOwner != address(0), "Utility: new owner address is 0x0");
-        owner = newOwner;
-    }
-
-    function renounceOwnership() external onlyOwner {
-        owner = address(0);
     }
 }

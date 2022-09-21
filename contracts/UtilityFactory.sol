@@ -1,12 +1,16 @@
 // solhint-disable
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IUtilityHelper.sol";
-import "./MemberUtility721.sol";
-import "./MemberUtility1155.sol";
+import "./CountMembership721.sol";
+import "./CountMembership1155.sol";
+import "./LifetimeMembership721.sol";
+import "./LifetimeMembership1155.sol";
+import "./TimelyMembership721.sol";
+import "./TimelyMembership1155.sol";
 
 contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
     address public helper;
@@ -47,8 +51,19 @@ contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
         uint8 nType = IUtilityHelper(helper).getType(nft);
         require(nType > 0, "Factory: given address is not erc721 or erc1155 standard");
         address utility;
-        if (nType == 1) utility = address(new MemberUtility721(msg.sender, nft, mType));
-        else utility = address(new MemberUtility1155(msg.sender, nft, mType));
+        if (nType == 1) {
+            if (mType == IUtilityHelper.MembershipType.COUNT_BASED)
+                utility = address(new CountMembership721(msg.sender, nft));
+            else if (mType == IUtilityHelper.MembershipType.TIMELY)
+                utility = address(new TimelyMembership721(msg.sender, nft));
+            else utility = address(new LifetimeMembership721(msg.sender, nft));
+        } else {
+            if (mType == IUtilityHelper.MembershipType.COUNT_BASED)
+                utility = address(new CountMembership1155(msg.sender, nft));
+            else if (mType == IUtilityHelper.MembershipType.TIMELY)
+                utility = address(new TimelyMembership1155(msg.sender, nft));
+            else utility = address(new LifetimeMembership1155(msg.sender, nft));
+        }
         utilities[nft] = utility;
         emit UtilityCreated(nft, utility, mType, nType == 1);
         return utility;

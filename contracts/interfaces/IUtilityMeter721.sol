@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
+pragma solidity 0.8.17;
 
 interface IUtilityMeter721 {
-    function increaseBalance(uint256 tokenId) external payable;
+    function makePayment(uint256 tokenId) external payable;
 
     function requestUseRight(uint256 tokenId) external;
 
