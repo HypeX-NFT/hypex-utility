@@ -11,13 +11,13 @@ import "./interfaces/IUtilityMembership1155.sol";
 contract LifetimeMembership1155 is BaseMemberUtility, IUtilityMeter1155, IUtilityMembership1155 {
     mapping(address => mapping(uint256 => Meter)) public meters;
 
-    constructor(address owner_, address nft_) {
-        owner = owner_;
+    constructor(address admin_, address nft_) {
+        admin = admin_;
         nft = nft_;
     }
 
-    function isValidMember(address account, uint256 id) external view returns (bool) {
-        return meters[account][id].isValid;
+    function isValidMember(address owner, uint256 id) external view returns (bool) {
+        return meters[owner][id].isValid;
     }
 
     function requestMembership(uint256 id) external payable {
@@ -27,7 +27,7 @@ contract LifetimeMembership1155 is BaseMemberUtility, IUtilityMeter1155, IUtilit
             "Utility: caller is not the owner of this nft"
         );
         require(!meter.isValid, "Utility: already valid membership");
-        require(meter.account == address(0), "Utility: already requested membership");
+        require(meter.owner == address(0), "Utility: already requested membership");
         require(msg.value >= memberPrice, "Utility: insufficient to request membership");
         if (msg.value > memberPrice) payable(msg.sender).transfer(msg.value - memberPrice);
         meters[msg.sender][id] = Meter(msg.sender, 0, 0, false, 0);
@@ -36,40 +36,40 @@ contract LifetimeMembership1155 is BaseMemberUtility, IUtilityMeter1155, IUtilit
 
     function discardRequest(uint256 id) external {
         require(
-            meters[msg.sender][id].account == msg.sender && !meters[msg.sender][id].isValid,
+            meters[msg.sender][id].owner == msg.sender && !meters[msg.sender][id].isValid,
             "Utility: no request exists for token id"
         );
         delete meters[msg.sender][id];
         emit MembershipRequestDiscarded(id, msg.sender);
     }
 
-    function approveRequest(address account, uint256 id) external onlyOwner {
-        Meter storage meter = meters[account][id];
+    function approveRequest(address owner, uint256 id) external onlyAdmin {
+        Meter storage meter = meters[owner][id];
         require(
-            meter.account != address(0) && !meter.isValid,
+            meter.owner != address(0) && !meter.isValid,
             "Utility: no request exists for token id"
         );
         meter.lastUpdated = block.timestamp;
         meter.isValid = true;
-        emit MembershipApproved(id, meter.account);
+        emit MembershipRequestApproved(id, meter.owner);
     }
 
-    function forfeitMembership(address account, uint256 id) external onlyOwner {
-        Meter storage meter = meters[account][id];
+    function forfeitMembership(address owner, uint256 id) external onlyAdmin {
+        Meter storage meter = meters[owner][id];
         require(meter.isValid, "Utility: no valid membership for token id");
         meter.isValid = false;
-        meter.account = address(0);
-        if (meter.right > 0) payable(meter.account).transfer(meter.right * rightPrice);
-        emit MembershipForfeitted(id, meter.account);
+        meter.owner = address(0);
+        if (meter.right > 0) payable(meter.owner).transfer(meter.right * rightPrice);
+        emit MembershipForfeitted(id, meter.owner);
     }
 
     function assignTo(uint256 id, address to) external {
         Meter storage meter = meters[msg.sender][id];
         require(
-            meter.account == msg.sender && meter.isValid,
+            meter.owner == msg.sender && meter.isValid,
             "Utility: not owner or invalid membership"
         );
-        meter.account = to;
+        meter.owner = to;
         meters[to][id] = meter;
         delete meters[msg.sender][id];
         emit MembershipAssignedTo(id, to);
@@ -79,7 +79,7 @@ contract LifetimeMembership1155 is BaseMemberUtility, IUtilityMeter1155, IUtilit
         Meter storage meter = meters[msg.sender][id];
         require(rightPrice > 0, "Utility: right price not set yet");
         require(
-            meter.account == msg.sender && meter.isValid,
+            meter.owner == msg.sender && meter.isValid,
             "Utility: not owner or invalid membership"
         );
         if (msg.value < rightPrice) {
@@ -91,7 +91,7 @@ contract LifetimeMembership1155 is BaseMemberUtility, IUtilityMeter1155, IUtilit
         if (msg.value > rightPrice) payable(msg.sender).transfer(msg.value - rightPrice);
     }
 
-    function requestUseRight(address account, uint256 id) external onlyOwner {
+    function requestUseRight(address owner, uint256 id) external onlyAdmin {
         revert("not supported in this type of membership");
     }
 
@@ -99,8 +99,8 @@ contract LifetimeMembership1155 is BaseMemberUtility, IUtilityMeter1155, IUtilit
         revert("not supported in this type of membership");
     }
 
-    function useRight(address account, uint256 id) external onlyOwner {
-        Meter storage meter = meters[msg.sender][id];
+    function useRight(address owner, uint256 id) external onlyAdmin {
+        Meter storage meter = meters[owner][id];
         require(meter.isValid, "Utility: invalid membership");
         require(meter.right > 0, "Utility: no right to use");
         meter.right--;

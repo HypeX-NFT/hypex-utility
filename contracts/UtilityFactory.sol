@@ -42,6 +42,16 @@ contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
+    /**
+     * @notice bind {nft} contract with {mType} memberhsip type
+     * @dev only {nft} contract owner can call this function
+     * @param nft address of nft collection
+     * @param mType membership type
+     * - LIFE_TIME (with PRIVILEGE)
+     * - COUNT_BASED
+     * - TIMELY (Montly/Yearly)
+     * @return address of generated utility contract
+     */
     function bindMember(address nft, IUtilityHelper.MembershipType mType)
         external
         onlyNFTIssuer(nft)

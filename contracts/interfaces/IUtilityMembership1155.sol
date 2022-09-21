@@ -2,9 +2,9 @@
 pragma solidity 0.8.17;
 
 interface IUtilityMembership1155 {
-    function isValidMember(address account, uint256 tokenId) external view returns (bool);
+    function isValidMember(address owner, uint256 id) external view returns (bool);
 
-    function requestMembership(uint256 tokenId) external payable;
+    function requestMembership(uint256 id) external payable;
 
-    function approveRequest(address account, uint256 tokenId) external;
+    function approveRequest(address owner, uint256 id) external;
 }
