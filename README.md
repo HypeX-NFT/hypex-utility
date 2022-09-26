@@ -29,14 +29,14 @@ interface BaseMemberUtility {
 ```
 interface MembershipUtility {
     function isValidMember(uint256 tokenId) external view returns (bool);
-     requestMembership(uint256 tokenId) external payable;
-     discardRequest(uint256 tokenId) external;
-     approveRequest(uint256 tokenId) external;
-     forfeitMembership(uint256 tokenId) external;
-     assignTo(uint256 tokenId, address to) external;
-     makePayment(uint256 tokenId) external payable;
-     requestUseRight(uint256 tokenId) external;
-     approveUseRights(uint256 tokenId) external;
-     useRight(uint256 tokenId) external;
+    function requestMembership(uint256 tokenId) external payable;
+    function discardRequest(uint256 tokenId) external;
+    function approveRequest(uint256 tokenId) external;
+    function forfeitMembership(uint256 tokenId) external;
+    function assignTo(uint256 tokenId, address to) external;
+    function makePayment(uint256 tokenId) external payable;
+    function requestUseRight(uint256 tokenId) external;
+    function approveUseRights(uint256 tokenId) external;
+    function useRight(uint256 tokenId) external;
 }
 ```
