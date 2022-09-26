@@ -57,7 +57,7 @@ abstract contract BaseMemberUtility {
 
     /// @notice set expiration duration
     /// @dev only valuable for timely membership
-    function setExpiration(uint256 duartion) external onlyAdmin {
-        expiration = duartion;
+    function setExpiration(uint256 duration) external onlyAdmin {
+        expiration = duration;
     }
 }

@@ -52,7 +52,7 @@ contract UtilityFactory is UUPSUpgradeable, OwnableUpgradeable {
      * - TIMELY (Montly/Yearly)
      * @return address of generated utility contract
      */
-    function bindMember(address nft, IUtilityHelper.MembershipType mType)
+    function bindNFTUtility(address nft, IUtilityHelper.MembershipType mType)
         external
         onlyNFTIssuer(nft)
         returns (address)
