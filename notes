@@ -1,7 +1,0 @@
-status:     membership
-balance:    privilege weight
-price:      msg.value / price = balance
-expiration: expiration of membership
-wallet:     
-
-
